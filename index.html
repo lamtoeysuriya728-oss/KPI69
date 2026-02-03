@@ -1,675 +1,378 @@
 <!doctype html>
 <html lang="th">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบรายงานผลงานประจำปี 2569</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-        body {
-            font-family: 'Sarabun', 'Noto Sans Thai', Arial, sans-serif;
-            height: 100vh;
-            background-color: #f0f4ff;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Background Animation */
-        .bg-animated {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1;
-        }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+<head>
 
-        /* Main Layout */
-        .main-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            width: 100%; max-width: 900px;
-            margin: auto; display: flex; flex-direction: row;
-            position: relative; z-index: 10;
-        }
-        @media (max-width: 768px) {
-            .main-card { flex-direction: column; margin: 20px; max-width: calc(100% - 40px); }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* Login Section */
-        .login-section { padding: 3rem; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .form-input {
-            width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;
-            font-size: 1rem; transition: all 0.2s; outline: none;
-        }
-        .form-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-        .btn-primary {
-            width: 100%; background: linear-gradient(to right, #4f46e5, #7c3aed); color: white;
-            padding: 0.875rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer;
-            transition: transform 0.2s; border: none; font-size: 1.1rem;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+<title>ระบบรายงาน KPI</title>
 
-        /* Calendar Section */
-        .info-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; padding: 2rem; flex: 0.8; display: flex; flex-direction: column;
-        }
-        .event-item {
-            background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem; padding: 0.75rem;
-            margin-bottom: 0.75rem; display: flex; align-items: flex-start; border-left: 4px solid #fbbf24; /* align-items: flex-start เพื่อให้วันที่อยู่บนสุดเสมอ */
-            animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        /* News Ticker Bar */
-        .news-ticker-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
-            background-color: #111827; color: white; display: flex; align-items: center; z-index: 100;
-        }
-        .ticker-label { 
-            background: #ef4444; height: 100%; padding: 0 15px; display: flex; align-items: center; font-weight: bold; 
-        }
-        .ticker-content { 
-            animation: ticker 30s linear infinite; 
-            white-space: nowrap; 
-            position: absolute; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-        }
-        @keyframes ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        /* PROFILE MODAL */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 9999;
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .profile-card {
-            background: white; width: 90%; max-width: 400px;
-            border-radius: 20px; overflow: hidden; transform: scale(0.9); transition: transform 0.3s;
-            text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-        .modal-overlay.active .profile-card { transform: scale(1); }
-        
-        .profile-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100px; position: relative;
-        }
-        .profile-img-wrapper {
-            width: 120px; height: 120px; border-radius: 50%; border: 5px solid white;
-            background: #eee; margin: -60px auto 15px; overflow: hidden; position: relative; z-index: 10;
-        }
-        .profile-img { width: 100%; height: 100%; object-fit: cover; }
-        
-    </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body>
-   
-   <div class="bg-animated"></div>
+<style>
 
-   <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding-bottom: 50px;">
-       
-       <div class="main-card">
-           
-           <div class="login-section">
-               <div class="text-center mb-8">
-                   <img src="https://img5.pic.in.th/file/secure-sv1/Red-White-Bold-Gladiator-Logo101.md.png" 
-                        class="w-20 h-20 mx-auto mb-4 object-contain" alt="Logo">
-                   <h1 class="text-2xl font-bold text-gray-800">ระบบรายงาน KPI ประจำปี 2569</h1>
-                   <p class="text-gray-500">กรุณาใส่รหัสประจำฝ่ายเพื่อเข้าทำรายงาน</p>
-               </div>
+body{
+font-family:'Sarabun',sans-serif;
+height:100vh;
+background:#f3f4f6;
+display:flex;
+flex-direction:column;
+}
 
-               <form onsubmit="checkPassword(event)">
-                   <div class="mb-4">
-                       <label class="block text-sm font-bold text-gray-700 mb-1"> 1. เลือกเดือนที่ต้องการทำรายงาน</label>
-                       <select id="login-month" class="form-input bg-white cursor-pointer" onchange="updateCalendar()">
-                           <option value="1">มกราคม 2569</option>
-						   <option value="2">กุมภาพันธ์ 2569</option>
-                           <option value="3">มีนาคม 2569</option>
-                           <option value="4">เมษายน 2569</option>
-                           <option value="5">พฤษภาคม 2569</option>
-                           <option value="6">มิถุนายน 2569</option>
-                           <option value="7">กรกฎาคม 2569</option>
-                           <option value="8">สิงหาคม 2569</option>
-                           <option value="9">กันยายน 2569</option>
-                           <option value="10">ตุลาคม 2569</option>
-                           <option value="11">พฤศจิกายน 2569</option>
-                           <option value="12">ธันวาคม 2569</option>
-                       </select>
-                   </div>
+.main-card{
+background:white;
+border-radius:20px;
+box-shadow:0 20px 25px rgba(0,0,0,.08);
+max-width:950px;
+width:100%;
+margin:auto;
+display:flex;
+overflow:hidden;
+}
 
-                   <div class="mb-6">
-                       <label class="block text-sm font-bold text-gray-700 mb-1">2. ใส่รหัสประจำตัว (8 หลัก)</label>
-                       <input type="password" id="login-password" class="form-input text-center tracking-widest text-lg" 
-                              placeholder="***" required>
-                       <p id="error-msg" class="text-red-500 text-sm mt-2 hidden text-center font-bold">⚠ รหัสผ่านไม่ถูกต้อง</p>
-                   </div>
+@media(max-width:768px){
+.main-card{flex-direction:column;margin:20px;}
+}
 
-                   <button type="submit" class="btn-primary">
-                       ตรวจสอบข้อมูล ➔
-                   </button>
-               </form>
+.login-section{
+padding:3rem;
+flex:1;
+}
 
-               <div class="mt-6 text-center pt-4 border-t border-gray-100">
-                   <button onclick="openZoneReport()" class="flex items-center justify-center mx-auto text-indigo-600 font-bold hover:text-indigo-800 transition">
-                       <span class="bg-indigo-100 p-2 rounded-full mr-2">📊</span>
-                       ดูสรุปภาพรวมกลุ่มการตลาดโซน 2
-                   </button>
-               </div>
-           </div>
+.info-section{
+background:linear-gradient(135deg,#667eea,#764ba2);
+color:white;
+padding:2rem;
+flex:.9;
+}
 
-           <div class="info-section">
-               <h2 class="text-xl font-bold mb-4 flex items-center justify-between">
-                   <span>📅 ปฏิทินกิจกรรม</span>
-                   <span id="calendar-month-label" class="text-sm bg-white text-indigo-700 px-2 py-1 rounded">มกราคม</span>
-               </h2>
-               <div class="flex-1 overflow-y-auto pr-2" id="calendar-container">
-                   </div>
-               
-               <div id="no-events-msg" class="hidden text-center text-white text-opacity-70 mt-10">
-                   <p class="text-4xl mb-2">🏝️</p>
-                   <p>ไม่มีกิจกรรมในเดือนนี้</p>
-               </div>
-           </div>
+.form-input{
+width:100%;
+padding:.7rem;
+border:2px solid #e5e7eb;
+border-radius:8px;
+}
 
-       </div>
-   </main>
+.btn-primary{
+width:100%;
+background:linear-gradient(to right,#4f46e5,#7c3aed);
+color:white;
+padding:.9rem;
+border-radius:8px;
+font-weight:bold;
+}
 
-   <div class="news-ticker-bar">
-       <div class="ticker-label">แจ้งข่าว</div>
-       <div style="flex:1; overflow:hidden; position:relative; height:100%;">
-           <div class="ticker-content">
-               <span class="mr-12">✦ สวัสดีผู้จัดการฝ่ายทุกท่าน</span>
-               <span class="mr-12">✦ โปรดตรวจสอบความถูกต้องของข้อมูลก่อนบันทึก</span>
-           </div>
-       </div>
-   </div>
+.event-item{
+background:rgba(255,255,255,.1);
+padding:.7rem;
+border-radius:8px;
+margin-bottom:.6rem;
+display:flex;
+align-items:flex-start;
+border-left:4px solid #fbbf24;
+}
 
-   <div class="modal-overlay" id="profile-modal">
-       <div class="profile-card">
-           <div class="profile-header">
-               <button onclick="closeModal()" class="absolute top-4 right-4 text-white opacity-70 hover:opacity-100 text-xl font-bold">&times;</button>
-           </div>
-           <div class="profile-img-wrapper">
-               <img id="modal-img" src="" class="profile-img" alt="Profile">
-           </div>
-           <div class="px-6 pb-8">
-               <h2 id="modal-name" class="text-2xl font-bold text-gray-800 mb-1"></h2>
-               <p id="modal-position" class="text-indigo-600 font-medium mb-6"></p>
-               <div class="bg-gray-50 rounded-lg p-3 mb-6">
-                   <p class="text-sm text-gray-500">กำลังจะเปิดรายงานประจำเดือน</p>
-                   <p id="modal-month-label" class="text-lg font-bold text-gray-800"></p>
-               </div>
-               <button onclick="proceedToSheet()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg shadow-lg transition transform hover:-translate-y-1">
-                   ✅ ยืนยัน / เปิดรายงาน
-               </button>
-               <button onclick="closeModal()" class="mt-3 text-gray-400 text-sm hover:text-gray-600 underline">ไม่ใช่บัญชีนี้? ยกเลิก</button>
-           </div>
-       </div>
-   </div>
+.today{
+border-left:4px solid #22c55e;
+background:rgba(34,197,94,.2);
+}
 
-   <script>
-       // ==========================================
-       // 1. ข้อมูลปฏิทิน
-       // ==========================================
-       const allEvents = [
-		   // มกราคม (1)
-           { monthId: 1, day
-           // กุมภาพันธ์ (2)
-           { monthId: 2, day: "06", month: "ก.พ.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "ยังไม่กำหนดสถาที่" },
-           { monthId: 2, day: "4-5", month: "ก.พ.", title: "Recruiter Boost Camp", time: "09:00 - 16:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 2, day: "10", month: "ก.พ.", title: "Rider Pro Plus (RPP) ", time: "09:00 - 16:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           { monthId: 2, day: "11", month: "ก.พ.", title: "Upsellng Excelllence", time: "09:00 - 16:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 2, day: "18", month: "ก.พ.", title: "After Follow With Omotenashi", time: "09:00 - 16:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   
-           // มีนาคม (3)
-           { monthId: 3, day: "05", month: "มี.ค.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 3, day: "07", month: "มี.ค.", title: "Summit Clib & Mini MBRT)", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 3, day: "19", month: "มี.ค.", title: "Onling Markeing", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
+</style>
+</head>
 
-           // เมษายน (4)
-           { monthId: 4, day: "03", month: "เม.ย.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 4, day: "07", month: "เม.ย.", title: "After Follow With Omotenashi", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 4, day: "21", month: "เม.ย.", title: "Best in Class Agen: BCA", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 4, day: "23", month: "เม.ย.", title: "Rider Pro Plus (RPP)", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // พฤษภาคม (5)
-           { monthId: 5, day: "6-7", month: "พ.ค.", title: "Recruiter Boost Camp", time: "09.00 - 16.00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 5, day: "08", month: "พ.ค.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // มิถุนายน (6)
-           { monthId: 6, day: "05", month: "มิ.ย.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 6, day: "09", month: "มิ.ย.", title: "Best in Class Agen: BCA", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 6, day: "10", month: "มิ.ย.", title: "Onling Markeing", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // กรกฎาคม (7)
-           { monthId: 7, day: "03", month: "ก.ค.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 7, day: "7,21", month: "ก.ค.", title: "Crossroads", time: "09:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 7, day: "15", month: "ก.ค.", title: "ประชุมผู้จัดการภาค/ฝ่ายรวมโซน", time: "09:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           { monthId: 7, day: "23", month: "ก.ค.", title: "Upsellng Excelllence", time: "09:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   
-		   // สิหาคม (8)
-		   { monthId: 8, day: "4,18", month: "ส.ค.", title: "Crossroads", time: "09:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           { monthId: 8, day: "06", month: "ส.ค.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 8, day: "13", month: "ส.ค.", title: "Rider Pro Plus (RPP)", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // กันยายน (9)
-           { monthId: 9, day: "1,15", month: "เม.ย.", title: "Crossroads", time: "09:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 9, day: "03", month: "เม.ย.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // ตุลาคม (10)
-           { monthId: 10, day: "07", month: "ต.ค.", title: "ประชุมฝ่าย)", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // พฤศจิกายน (11)
-           { monthId: 11, day: "04", month: "พ.ย.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-		   { monthId: 11, day: "19", month: "พ.ย.", title: "พัฒนาทักษะผู้บริหารฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-		   // ธันวาคม (12)
-           { monthId: 12, day: "03", month: "ธ.ค.", title: "ประชุมฝ่าย", time: "13:00 น.", location: "(ยังไม่กำหนดสถาที่)" },
-           
-       ];
+<body>
 
-       // ฟังก์ชันอัปเดตปฏิทิน
-       function updateCalendar() {
-           const monthSelect = document.getElementById('login-month');
-           const selectedMonthId = parseInt(monthSelect.value);
-           const selectedMonthName = monthSelect.options[monthSelect.selectedIndex].text.split(' ')[0]; 
-           
-           document.getElementById('calendar-month-label').textContent = selectedMonthName;
+<main style="flex:1;display:flex;align-items:center;justify-content:center;padding-bottom:40px;">
 
-           const filteredEvents = allEvents.filter(e => e.monthId === selectedMonthId);
-           const container = document.getElementById('calendar-container');
-           const noEventsMsg = document.getElementById('no-events-msg');
+<div class="main-card">
 
-           container.innerHTML = ""; 
+<!-- LOGIN -->
+<div class="login-section">
 
-           if (filteredEvents.length > 0) {
-               noEventsMsg.classList.add('hidden');
-               container.innerHTML = filteredEvents.map(evt => `
-                   <div class="event-item hover:bg-white hover:bg-opacity-20 transition">
-                       <div class="bg-white text-indigo-600 rounded p-1 text-center min-w-[50px] mr-3 mt-1">
-                           <div class="text-lg font-bold leading-none">${evt.day}</div>
-                           <div class="text-xs">${evt.month}</div>
-                       </div>
-                       <div class="flex-1">
-                           <div class="font-bold text-sm mb-1">${evt.title}</div>
-                           
-                           <div class="text-xs opacity-90 flex items-center mb-1">
-                               <span class="mr-1">🕒</span> ${evt.time}
-                           </div>
-                           
-                           ${evt.location ? `
-                           <div class="text-xs opacity-90 flex items-start">
-                               <span class="mr-1 mt-0.5">📍</span> 
-                               <span>${evt.location}</span>
-                           </div>` : ''}
-                       </div>
-                   </div>
-               `).join('');
-           } else {
-               noEventsMsg.classList.remove('hidden');
-           }
-       }
+<h1 class="text-2xl font-bold mb-6 text-center">
+ระบบรายงาน KPI
+</h1>
 
-		document.addEventListener('DOMContentLoaded', () => {
-   			 const now = new Date();
+<form onsubmit="checkPassword(event)">
 
-  			  // เดือนปัจจุบัน (1-12)
- 		     const currentMonth = now.getMonth() + 1;
+<label class="font-bold text-sm">
+1. เดือนที่ต้องกรอก KPI
+</label>
 
-              // คำนวณ "เดือนก่อนหน้า"
-             let reportMonth = currentMonth - 1;
+<select id="login-month"
+class="form-input mt-1 mb-4"
+onchange="updateCalendar()">
+</select>
 
-              // กัน bug เดือนมกราคม
-             if (reportMonth === 0) {
-             reportMonth = 12;
-         }
+<label class="font-bold text-sm">
+2. รหัสประจำตัว
+</label>
 
-        const monthSelect = document.getElementById('login-month');
+<input type="password"
+id="login-password"
+class="form-input text-center mt-1"
+required>
 
-              // 👉 ให้ dropdown เลือก "เดือนก่อน"
-    monthSelect.value = reportMonth;
+<p id="error-msg"
+class="text-red-500 hidden font-bold text-center mt-2">
+รหัสผ่านไม่ถูกต้อง
+</p>
 
-    // 👉 แต่ปฏิทินจะโชว์ตาม dropdown อยู่แล้ว
-    updateCalendar();
-});
+<button class="btn-primary mt-4">
+เข้าสู่ระบบ
+</button>
+
+</form>
+
+</div>
 
 
-       // ==========================================
-       // DATA & LOGIC อื่นๆ 
-       // ==========================================
-       const zoneLinks = {
-           1: "https://docs.google.com/spreadsheets/d/16q3EZt48isOrnvh6s0sET5WQtAPB_zsUXZ2TTUODT5I/edit?gid=1541153933#gid=1541153933",
-           2: "https://docs.google.com/spreadsheets/d/16q3EZt48isOrnvh6s0sET5WQtAPB_zsUXZ2TTUODT5I/edit?gid=166963857#gid=166963857",
-           3: "https://docs.google.com/spreadsheets/d/16q3EZt48isOrnvh6s0sET5WQtAPB_zsUXZ2TTUODT5I/edit?gid=1013669572#gid=1013669572",
-		   4: "https://docs.google.com/spreadsheets/d/16q3EZt48isOrnvh6s0sET5WQtAPB_zsUXZ2TTUODT5I/edit?gid=2066786889#gid=2066786889", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: ""
-       };
+<!-- CALENDAR -->
+<div class="info-section">
 
-       const persons = [
-           { password: "72811238", name: "นายประดิษฐ์ แสงชัย", position: "ผจก.ฝ่ายขยายงานภูมิภาค 4", image: "https://img2.pic.in.th/pic/16cf2d0a100884469f.jpg", 
-		   links: { 
-		   1: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=555114306#gid=555114306", 
-		   2: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=439267110#gid=439267110", 
-		   3: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=342529215#gid=342529215", 
-		   4: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=2091890571#gid=2091890571", 
-		   5: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=1979173201#gid=1979173201", 
-		   6: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=1207909095#gid=1207909095", 
-		   7: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=2071215194#gid=2071215194", 
-		   8: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=1323691063#gid=1323691063", 
-		   9: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=2028567088#gid=2028567088", 
-		   10: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=2042371837#gid=2042371837", 
-		   11: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=718257619#gid=718257619", 
-		   12: "https://docs.google.com/spreadsheets/d/1CWmiVWGFG-mTuhPh50ht-MhJA_VYh5_nFju0VRbAxsw/edit?gid=321163629#gid=321163629",  
-		   } 
-		   },
-		   
-           { password: "53511155", name: "นายสง่า บัวไขย", position: "ผจก.ฝ่ายขยายงานภูมิภาค 6", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/53511155.jpg", 
-		   links: { 
-		   1: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=1557137715#gid=1557137715", 
-		   2: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=874280487#gid=874280487", 
-		   3: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=61719262#gid=61719262", 
-		   4: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=970518889#gid=970518889", 
-		   5: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=116392916#gid=116392916", 
-		   6: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=771443923#gid=771443923", 
-		   7: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=277920422#gid=277920422", 
-		   8: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=413000808#gid=413000808", 
-		   9: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=1805828493#gid=1805828493", 
-		   10: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=30774330#gid=30774330", 
-		   11: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=1018666293#gid=1018666293", 
-		   12: "https://docs.google.com/spreadsheets/d/1V8jdUmkJrkJ2TffLb01p9iF2G3mc4agHy7Yfm8xzdDo/edit?gid=558611616#gid=558611616",  
-		   } 
-		   },
-		   
-           { password: "72120293", name: "นายวิรันต์โรจน์ การพะวงศ์", position: "ผจก.ฝ่ายขยายงานภูมิภาค 23", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/72120293.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "65110067", name: "นางสุพิชฌาย์ เจือจันทร์", position: "ผจก.ฝ่ายขยายงานภูมิภาค 24", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/65110067.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "65211935", name: "นางตรีชญาฎาฉ์ พระงาม", position: "ผจก.ฝ่ายขยายงานภูมิภาค 42", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/65211935.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "72412745", name: "นางไพบูรณ์ ราตรี", position: "ผจก.ฝ่ายขยายงานภูมิภาค 71", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/72412745.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   }
-		   },
-		   
-           { password: "53219280", name: "นายญาณวุฒิ ธรรมมาบุญ", position: "ผจก.ฝ่ายขยายงานภูมิภาค 81", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/53219280.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "65314630", name: "นางบังอร พงค์พีระ", position: "ผจก.ฝ่ายขยายงานภูมิภาค 82", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/65314630.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "53219280", name: "นายญาณวุฒิ ธรรมมาบุญ", position: "ผจก.ฝ่ายขยายงานภูมิภาค 103", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/53219280.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "65422805", name: "นางพิมพ์ลดา พสิษฐ์พงศกร", position: "ผจก.ฝ่ายขยายงานภูมิภาค 111", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/65422805.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "72115105", name: "นายธนกร นิยมศรี", position: "ผจก.ฝ่ายขยายงานภูมิภาค 118", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/72115105.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "53313779", name: "นางกัญญาวีร์ ภูหมื่น", position: "ผจก.ฝ่ายขยายงานภูมิภาค 121", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/53313779.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "72211829", name: "นางสุดารัตน์ เชี่ยวสกุล", position: "ผจก.ฝ่ายขยายงานภูมิภาค 127", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/72211829.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-		   
-           { password: "53212623", name: "นายอัครพัฒน์ กองพงษ์", position: "ผจก.ฝ่ายขยายงานภูมิภาค 130", image: "https://assets.thailife.com/IT/ca/upload_file/sale_pic/53212623.jpg", 
-		   links: { 
-		   1: "", 
-		   2: "", 
-		   3: "", 
-		   4: "", 
-		   5: "", 
-		   6: "", 
-		   7: "", 
-		   8: "", 
-		   9: "", 
-		   10: "", 
-		   11: "", 
-		   12: "",  
-		   } 
-		   },
-       ];
+<div class="flex justify-between mb-3">
+<h2 class="font-bold">📅 ปฏิทินเดือนปัจจุบัน</h2>
 
-       let currentUser = null;
+<span id="calendar-month-label"
+class="bg-white text-indigo-700 px-2 rounded">
+</span>
+</div>
 
-       function checkPassword(e) {
-           e.preventDefault();
-           const password = document.getElementById('login-password').value.trim();
-           const errorMsg = document.getElementById('error-msg');
-           const passwordInput = document.getElementById('login-password');
+<div id="calendar-container">
+กำลังโหลด...
+</div>
 
-           const user = persons.find(p => p.password === password);
+<div id="no-events-msg"
+class="hidden text-center opacity-70 mt-6">
+ไม่มีกิจกรรมในเดือนนี้
+</div>
 
-           if (user) {
-               currentUser = user;
-               errorMsg.classList.add('hidden');
-               passwordInput.classList.remove('border-red-500');
-               showProfileModal(user);
-           } else {
-               errorMsg.classList.remove('hidden');
-               passwordInput.classList.add('border-red-500');
-               passwordInput.animate([{ transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 300 });
-           }
-       }
+</div>
 
-       function showProfileModal(user) {
-           const monthSelect = document.getElementById('login-month');
-           const monthText = monthSelect.options[monthSelect.selectedIndex].text;
-           document.getElementById('modal-name').textContent = user.name;
-           document.getElementById('modal-position').textContent = user.position;
-           document.getElementById('modal-img').src = user.image;
-           document.getElementById('modal-month-label').textContent = monthText;
-           document.getElementById('profile-modal').classList.add('active');
-       }
+</div>
+</main>
 
-       function proceedToSheet() {
-           const month = parseInt(document.getElementById('login-month').value);
-           if (currentUser) {
-               const link = currentUser.links[month];
-               if (link && link !== "") {
-                   window.open(link, '_blank');
-                   closeModal();
-               } else {
-                   alert("ขออภัย ยังไม่มีลิงก์รายงานสำหรับเดือนนี้");
-               }
-           }
-       }
 
-       function closeModal() {
-           document.getElementById('profile-modal').classList.remove('active');
-           currentUser = null;
-           document.getElementById('login-password').value = '';
-       }
+<script>
 
-       function openZoneReport() {
-           const month = parseInt(document.getElementById('login-month').value);
-           const link = zoneLinks[month];
-           if (link) window.open(link, '_blank');
-           else alert("ยังไม่มีลิงก์สรุปเดือนนี้");
-       }
-   </script>
- </body>
+// ===================================
+// CONFIG
+// ===================================
 
+const API_URL = "https://script.google.com/macros/s/AKfycbwJENSbxWNTpn59s5HTnwJg272rE1vV_Vhj1RqninlKPM4Ps2vY_Rxnhp7KKFncLgdl-g/exec";
+
+let allEvents=[];
+let users=[];
+
+let calendarMonth; // เดือนปัจจุบัน
+let reportMonth;   // เดือนกรอกย้อนหลัง
+
+
+const thaiMonths=[
+"มกราคม","กุมภาพันธ์","มีนาคม","เมษายน",
+"พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม",
+"กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+];
+
+
+// ===================================
+// INIT ⭐⭐⭐⭐⭐
+// ===================================
+
+document.addEventListener('DOMContentLoaded', init);
+
+async function init(){
+
+await loadConfig();     // โหลดเดือนก่อน
+generateDropdown();     // สร้าง dropdown
+await loadEvents();     // โหลดปฏิทิน
+await loadUsers();      // โหลด user
+
+updateCalendar(calendarMonth); // ⭐ แสดงเดือนปัจจุบัน
+
+}
+
+
+// ===================================
+// LOAD CONFIG (เดือน)
+// ===================================
+
+async function loadConfig(){
+
+const res=await fetch(API_URL+"?type=config");
+const config=await res.json();
+
+calendarMonth=config.calendarMonth;
+reportMonth=config.reportMonth;
+
+}
+
+
+// ===================================
+// DROPDOWN
+// ===================================
+
+function generateDropdown(){
+
+const select=document.getElementById('login-month');
+
+for(let i=1;i<=12;i++){
+
+const option=document.createElement("option");
+option.value=i;
+option.textContent=thaiMonths[i-1];
+
+select.appendChild(option);
+
+}
+
+select.value=reportMonth; // ⭐ เดือนย้อนหลัง
+
+}
+
+
+// ===================================
+// LOAD EVENTS
+// ===================================
+
+async function loadEvents(){
+
+const res=await fetch(API_URL+"?type=calendar");
+allEvents=await res.json();
+
+allEvents.sort((a,b)=>parseInt(a.day)-parseInt(b.day));
+
+}
+
+
+// ===================================
+// LOAD USERS
+// ===================================
+
+async function loadUsers(){
+
+const res=await fetch(API_URL+"?type=users");
+users=await res.json();
+
+}
+
+
+// ===================================
+// CALENDAR
+// ===================================
+
+function updateCalendar(monthOverride){
+
+const monthId = monthOverride ??
+parseInt(document.getElementById('login-month').value);
+
+const container=document.getElementById('calendar-container');
+const noEvents=document.getElementById('no-events-msg');
+
+document.getElementById('calendar-month-label')
+.textContent=thaiMonths[monthId-1];
+
+const today=new Date().getDate();
+
+const events=allEvents.filter(e=>e.monthId===monthId);
+
+container.innerHTML="";
+
+if(events.length){
+
+noEvents.classList.add('hidden');
+
+container.innerHTML=events.map(evt=>`
+
+<div class="event-item ${evt.day==today?'today':''}">
+
+<div class="mr-3 font-bold">
+${evt.day}
+</div>
+
+<div>
+<div class="font-bold">${evt.title}</div>
+<div class="text-sm opacity-80">${evt.time}</div>
+<div class="text-xs opacity-70">${evt.location??''}</div>
+</div>
+
+</div>
+
+`).join('');
+
+}else{
+
+noEvents.classList.remove('hidden');
+
+}
+
+}
+
+
+// ===================================
+// LOGIN
+// ===================================
+
+let currentUser=null;
+
+function checkPassword(e){
+
+e.preventDefault();
+
+const password=document
+.getElementById('login-password')
+.value.trim();
+
+const user=users.find(u=>u.password==password);
+
+if(!user){
+
+document
+.getElementById('error-msg')
+.classList.remove('hidden');
+
+return;
+}
+
+currentUser=user;
+
+openSheet();
+
+}
+
+
+// ===================================
+// OPEN SHEET
+// ===================================
+
+function openSheet(){
+
+const month=parseInt(
+document.getElementById('login-month').value
+);
+
+const link=currentUser["m"+month];
+
+if(link){
+
+window.open(link,'_blank');
+
+}else{
+
+alert("ยังไม่มีลิงก์เดือนนี้");
+
+}
+
+}
+
+</script>
+
+</body>
 </html>
+
+
 
 
 
