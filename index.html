@@ -139,18 +139,18 @@
                    <div class="mb-4">
                        <label class="block text-sm font-bold text-gray-700 mb-1"> 1. เลือกเดือนที่ต้องการทำรายงาน</label>
                        <select id="login-month" class="form-input bg-white cursor-pointer" onchange="updateCalendar()">
-                           <option value="1">กุมภาพันธ์ 2569</option>
-                           <option value="2">มีนาคม 2569</option>
-                           <option value="3">เมษายน 2569</option>
-                           <option value="4">พฤษภาคม 2569</option>
-                           <option value="5">มิถุนายน 2569</option>
-                           <option value="6">กรกฎาคม 2569</option>
-                           <option value="7">สิงหาคม 2569</option>
-                           <option value="8">กันยายน 2569</option>
-                           <option value="9">ตุลาคม 2569</option>
-                           <option value="10">พฤศจิกายน 2569</option>
-                           <option value="11">ธันวาคม 2569</option>
-                           <option value="12">มกราคม 2570</option>
+                           <option value="1">มกราคม 2570</option>
+						   <option value="2">กุมภาพันธ์ 2569</option>
+                           <option value="3">มีนาคม 2569</option>
+                           <option value="4">เมษายน 2569</option>
+                           <option value="5">พฤษภาคม 2569</option>
+                           <option value="6">มิถุนายน 2569</option>
+                           <option value="7">กรกฎาคม 2569</option>
+                           <option value="8">สิงหาคม 2569</option>
+                           <option value="9">กันยายน 2569</option>
+                           <option value="10">ตุลาคม 2569</option>
+                           <option value="11">พฤศจิกายน 2569</option>
+                           <option value="12">ธันวาคม 2569</option>
                        </select>
                    </div>
 
@@ -329,15 +329,29 @@
            }
        }
 
-       document.addEventListener('DOMContentLoaded', () => {
-           const now = new Date();
-           const currentMonth = now.getMonth() + 1; 
-           const monthSelect = document.getElementById('login-month');
-           if(currentMonth <= 12) {
-               monthSelect.value = currentMonth;
-           }
-           updateCalendar();
-       });
+		document.addEventListener('DOMContentLoaded', () => {
+   			 const now = new Date();
+
+  			  // เดือนปัจจุบัน (1-12)
+ 		     const currentMonth = now.getMonth() + 1;
+
+              // คำนวณ "เดือนก่อนหน้า"
+             let reportMonth = currentMonth - 1;
+
+              // กัน bug เดือนมกราคม
+             if (reportMonth === 0) {
+             reportMonth = 12;
+         }
+
+        const monthSelect = document.getElementById('login-month');
+
+              // 👉 ให้ dropdown เลือก "เดือนก่อน"
+    monthSelect.value = reportMonth;
+
+    // 👉 แต่ปฏิทินจะโชว์ตาม dropdown อยู่แล้ว
+    updateCalendar();
+});
+
 
        // ==========================================
        // DATA & LOGIC อื่นๆ 
@@ -658,6 +672,7 @@
  </body>
 
 </html>
+
 
 
 
