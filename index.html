@@ -141,7 +141,9 @@ class="bg-white text-indigo-700 px-2 rounded">
 </div>
 
 <div id="calendar-container">
-กำลังโหลด...
+<div class="animate-pulse opacity-70">
+กำลังโหลดปฏิทิน...
+</div>
 </div>
 
 <div id="no-events-msg"
@@ -157,18 +159,15 @@ class="hidden text-center opacity-70 mt-6">
 
 <script>
 
-// ===================================
+// =============================
 // CONFIG
-// ===================================
+// =============================
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwJENSbxWNTpn59s5HTnwJg272rE1vV_Vhj1RqninlKPM4Ps2vY_Rxnhp7KKFncLgdl-g/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbxXPg_A-8lLZWMllH6s_VUPQ2BVXu88rxW-kg5TcvxDQRBRjxXd9oKN_q1LI-ksfqZBZw/exec";
 
 let allEvents=[];
-let users=[];
-
-let calendarMonth; // เดือนปัจจุบัน
-let reportMonth;   // เดือนกรอกย้อนหลัง
-
+let calendarMonth;
+let reportMonth;
 
 const thaiMonths=[
 "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน",
@@ -177,46 +176,77 @@ const thaiMonths=[
 ];
 
 
-// ===================================
-// INIT ⭐⭐⭐⭐⭐
-// ===================================
+// =============================
+// FAST FETCH (กันค้าง)
+// =============================
 
-document.addEventListener('DOMContentLoaded', init);
+async function fastFetch(url,options={}){
 
-async function init(){
+const controller=new AbortController();
+const timeout=setTimeout(()=>controller.abort(),8000);
 
-await loadConfig();     // โหลดเดือนก่อน
-generateDropdown();     // สร้าง dropdown
-await loadEvents();     // โหลดปฏิทิน
-await loadUsers();      // โหลด user
+try{
 
-updateCalendar(calendarMonth); // ⭐ แสดงเดือนปัจจุบัน
+const res=await fetch(url,{
+...options,
+signal:controller.signal
+});
+
+return await res.json();
+
+}catch(err){
+
+alert("โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช");
+throw err;
+
+}finally{
+clearTimeout(timeout);
+}
 
 }
 
 
-// ===================================
-// LOAD CONFIG (เดือน)
-// ===================================
+// =============================
+// INIT ⭐⭐⭐⭐⭐
+// =============================
 
-async function loadConfig(){
+document.addEventListener('DOMContentLoaded',init);
 
-const res=await fetch(API_URL+"?type=config");
-const config=await res.json();
+async function init(){
+
+try{
+
+// ยิงพร้อมกัน = เร็วขึ้นเยอะ
+const [config,events]=await Promise.all([
+fastFetch(API_URL+"?type=config"),
+fastFetch(API_URL+"?type=calendar")
+]);
 
 calendarMonth=config.calendarMonth;
 reportMonth=config.reportMonth;
 
+generateDropdown();
+
+allEvents=events.sort((a,b)=>a.day-b.day);
+
+updateCalendar(calendarMonth);
+
+}catch(err){
+console.error(err);
+}
+
 }
 
 
-// ===================================
+// =============================
 // DROPDOWN
-// ===================================
+// =============================
 
 function generateDropdown(){
 
 const select=document.getElementById('login-month');
+
+select.innerHTML="";
 
 for(let i=1;i<=12;i++){
 
@@ -228,40 +258,14 @@ select.appendChild(option);
 
 }
 
-select.value=reportMonth; // ⭐ เดือนย้อนหลัง
+select.value=reportMonth;
 
 }
 
 
-// ===================================
-// LOAD EVENTS
-// ===================================
-
-async function loadEvents(){
-
-const res=await fetch(API_URL+"?type=calendar");
-allEvents=await res.json();
-
-allEvents.sort((a,b)=>parseInt(a.day)-parseInt(b.day));
-
-}
-
-
-// ===================================
-// LOAD USERS
-// ===================================
-
-async function loadUsers(){
-
-const res=await fetch(API_URL+"?type=users");
-users=await res.json();
-
-}
-
-
-// ===================================
-// CALENDAR
-// ===================================
+// =============================
+// CALENDAR (Render เร็ว)
+// =============================
 
 function updateCalendar(monthOverride){
 
@@ -278,19 +282,23 @@ const today=new Date().getDate();
 
 const events=allEvents.filter(e=>e.monthId===monthId);
 
-container.innerHTML="";
+if(!events.length){
 
-if(events.length){
+container.innerHTML="";
+noEvents.classList.remove('hidden');
+return;
+
+}
 
 noEvents.classList.add('hidden');
 
-container.innerHTML=events.map(evt=>`
+let html="";
 
+for(const evt of events){
+
+html+=`
 <div class="event-item ${evt.day==today?'today':''}">
-
-<div class="mr-3 font-bold">
-${evt.day}
-</div>
+<div class="mr-3 font-bold">${evt.day}</div>
 
 <div>
 <div class="font-bold">${evt.title}</div>
@@ -299,35 +307,45 @@ ${evt.day}
 </div>
 
 </div>
-
-`).join('');
-
-}else{
-
-noEvents.classList.remove('hidden');
+`;
 
 }
+
+container.innerHTML=html;
 
 }
 
 
-// ===================================
-// LOGIN
-// ===================================
+// =============================
+// LOGIN (Secure + เร็ว)
+// =============================
 
-let currentUser=null;
-
-function checkPassword(e){
+async function checkPassword(e){
 
 e.preventDefault();
+
+document.getElementById('error-msg')
+.classList.add('hidden');
 
 const password=document
 .getElementById('login-password')
 .value.trim();
 
-const user=users.find(u=>u.password==password);
+const month=document
+.getElementById('login-month').value;
 
-if(!user){
+try{
+
+const res=await fastFetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"login",
+password,
+month
+})
+});
+
+if(!res.success){
 
 document
 .getElementById('error-msg')
@@ -336,32 +354,12 @@ document
 return;
 }
 
-currentUser=user;
+// redirect ดูโปรกว่าเปิด tab
+window.location.href=res.link;
 
-openSheet();
+}catch(err){
 
-}
-
-
-// ===================================
-// OPEN SHEET
-// ===================================
-
-function openSheet(){
-
-const month=parseInt(
-document.getElementById('login-month').value
-);
-
-const link=currentUser["m"+month];
-
-if(link){
-
-window.open(link,'_blank');
-
-}else{
-
-alert("ยังไม่มีลิงก์เดือนนี้");
+console.error(err);
 
 }
 
@@ -371,13 +369,3 @@ alert("ยังไม่มีลิงก์เดือนนี้");
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
