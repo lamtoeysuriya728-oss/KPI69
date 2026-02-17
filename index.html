@@ -18,7 +18,8 @@ font-family:'Sarabun',sans-serif;
 height:100vh;
 background:#f3f4f6;
 display:flex;
-flex-direction:column;
+align-items:center;
+justify-content:center;
 }
 
 .main-card{
@@ -27,19 +28,11 @@ border-radius:20px;
 box-shadow:0 20px 25px rgba(0,0,0,.08);
 max-width:950px;
 width:100%;
-margin:auto;
 display:flex;
 overflow:hidden;
 }
 
-@media(max-width:768px){
-.main-card{flex-direction:column;margin:20px;}
-}
-
-.login-section{
-padding:3rem;
-flex:1;
-}
+.login-section{padding:3rem;flex:1;}
 
 .info-section{
 background:linear-gradient(135deg,#667eea,#764ba2);
@@ -70,7 +63,6 @@ padding:.7rem;
 border-radius:8px;
 margin-bottom:.6rem;
 display:flex;
-align-items:flex-start;
 border-left:4px solid #fbbf24;
 }
 
@@ -84,11 +76,8 @@ background:rgba(34,197,94,.2);
 
 <body>
 
-<main style="flex:1;display:flex;align-items:center;justify-content:center;padding-bottom:40px;">
-
 <div class="main-card">
 
-<!-- LOGIN -->
 <div class="login-section">
 
 <h1 class="text-2xl font-bold mb-6 text-center">
@@ -98,7 +87,7 @@ background:rgba(34,197,94,.2);
 <form onsubmit="checkPassword(event)">
 
 <label class="font-bold text-sm">
-1. เดือนที่ต้องกรอก KPI
+เดือนที่ต้องกรอก KPI
 </label>
 
 <select id="login-month"
@@ -107,7 +96,7 @@ onchange="updateCalendar()">
 </select>
 
 <label class="font-bold text-sm">
-2. รหัสประจำตัว
+รหัสประจำตัว
 </label>
 
 <input type="password"
@@ -129,11 +118,10 @@ class="text-red-500 hidden font-bold text-center mt-2">
 </div>
 
 
-<!-- CALENDAR -->
 <div class="info-section">
 
 <div class="flex justify-between mb-3">
-<h2 class="font-bold">📅 ปฏิทินเดือนปัจจุบัน</h2>
+<h2 class="font-bold">📅 ปฏิทิน</h2>
 
 <span id="calendar-month-label"
 class="bg-white text-indigo-700 px-2 rounded">
@@ -141,28 +129,21 @@ class="bg-white text-indigo-700 px-2 rounded">
 </div>
 
 <div id="calendar-container">
-<div class="animate-pulse opacity-70">
-กำลังโหลดปฏิทิน...
-</div>
+กำลังโหลด...
 </div>
 
 <div id="no-events-msg"
 class="hidden text-center opacity-70 mt-6">
-ไม่มีกิจกรรมในเดือนนี้
+ไม่มีกิจกรรม
 </div>
 
 </div>
 
 </div>
-</main>
-
 
 <script>
 
-// =============================
-// CONFIG
-// =============================
-
+// 🔥 ใส่ URL /exec
 const API_URL="https://script.google.com/macros/s/AKfycbxXPg_A-8lLZWMllH6s_VUPQ2BVXu88rxW-kg5TcvxDQRBRjxXd9oKN_q1LI-ksfqZBZw/exec";
 
 let allEvents=[];
@@ -175,86 +156,52 @@ const thaiMonths=[
 "กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
 ];
 
-
-// =============================
-// FAST FETCH (กันค้าง)
-// =============================
-
-async function fastFetch(url,options={}){
-
-const controller=new AbortController();
-const timeout=setTimeout(()=>controller.abort(),8000);
-
-try{
-
-const res=await fetch(url,{
-...options,
-signal:controller.signal
-});
-
-return await res.json();
-
-}catch(err){
-
-alert("โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช");
-throw err;
-
-}finally{
-clearTimeout(timeout);
-}
-
-}
-
-
-// =============================
-// INIT ⭐⭐⭐⭐⭐
-// =============================
-
 document.addEventListener('DOMContentLoaded',init);
 
 async function init(){
 
 try{
 
-// ยิงพร้อมกัน = เร็วขึ้นเยอะ
-const [config,events]=await Promise.all([
-fastFetch(API_URL+"?type=config"),
-fastFetch(API_URL+"?type=calendar")
+const configReq = fetch(API_URL+"?type=config");
+const calReq = fetch(API_URL+"?type=calendar");
+
+const [configRes,calRes]=await Promise.all([
+configReq,calReq
 ]);
+
+const config=await configRes.json();
+allEvents=await calRes.json();
 
 calendarMonth=config.calendarMonth;
 reportMonth=config.reportMonth;
 
 generateDropdown();
-
-allEvents=events.sort((a,b)=>a.day-b.day);
-
 updateCalendar(calendarMonth);
 
 }catch(err){
+
+alert("โหลดข้อมูลไม่ได้");
 console.error(err);
-}
 
 }
 
+}
 
-// =============================
+
+// =================
 // DROPDOWN
-// =============================
+// =================
 
 function generateDropdown(){
 
 const select=document.getElementById('login-month');
 
-select.innerHTML="";
-
 for(let i=1;i<=12;i++){
 
-const option=document.createElement("option");
-option.value=i;
-option.textContent=thaiMonths[i-1];
-
-select.appendChild(option);
+const opt=document.createElement("option");
+opt.value=i;
+opt.textContent=thaiMonths[i-1];
+select.appendChild(opt);
 
 }
 
@@ -263,24 +210,24 @@ select.value=reportMonth;
 }
 
 
-// =============================
-// CALENDAR (Render เร็ว)
-// =============================
+// =================
+// CALENDAR
+// =================
 
 function updateCalendar(monthOverride){
 
 const monthId = monthOverride ??
 parseInt(document.getElementById('login-month').value);
 
-const container=document.getElementById('calendar-container');
-const noEvents=document.getElementById('no-events-msg');
-
 document.getElementById('calendar-month-label')
 .textContent=thaiMonths[monthId-1];
 
+const container=document.getElementById('calendar-container');
+const noEvents=document.getElementById('no-events-msg');
+
 const today=new Date().getDate();
 
-const events=allEvents.filter(e=>e.monthId===monthId);
+const events=allEvents.filter(e=>e.monthId==monthId);
 
 if(!events.length){
 
@@ -292,39 +239,34 @@ return;
 
 noEvents.classList.add('hidden');
 
-let html="";
+container.innerHTML=events.map(evt=>`
 
-for(const evt of events){
-
-html+=`
 <div class="event-item ${evt.day==today?'today':''}">
 <div class="mr-3 font-bold">${evt.day}</div>
 
 <div>
 <div class="font-bold">${evt.title}</div>
-<div class="text-sm opacity-80">${evt.time}</div>
-<div class="text-xs opacity-70">${evt.location??''}</div>
+<div class="text-sm">${evt.time}</div>
+<div class="text-xs">${evt.location??''}</div>
 </div>
 
 </div>
-`;
 
-}
-
-container.innerHTML=html;
+`).join('');
 
 }
 
 
-// =============================
-// LOGIN (Secure + เร็ว)
-// =============================
+// =================
+// LOGIN ⭐ FIX สำคัญ
+// =================
 
 async function checkPassword(e){
 
 e.preventDefault();
 
-document.getElementById('error-msg')
+document
+.getElementById('error-msg')
 .classList.add('hidden');
 
 const password=document
@@ -336,29 +278,40 @@ const month=document
 
 try{
 
-const res=await fastFetch(API_URL,{
+const res=await fetch(API_URL,{
+
 method:"POST",
+
+headers:{
+"Content-Type":"application/json" // 🔥 ตัวนี้สำคัญมาก
+},
+
 body:JSON.stringify({
 type:"login",
 password,
 month
 })
+
 });
 
-if(!res.success){
+const data=await res.json();
+
+if(!data.success){
 
 document
 .getElementById('error-msg')
 .classList.remove('hidden');
 
 return;
+
 }
 
-// redirect ดูโปรกว่าเปิด tab
-window.location.href=res.link;
+// redirect
+window.location.href=data.link;
 
 }catch(err){
 
+alert("Login ไม่สำเร็จ");
 console.error(err);
 
 }
